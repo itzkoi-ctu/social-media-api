@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/posts")
+@RequestMapping("${api.prefix}/posts")
 @AllArgsConstructor
 public class PostController {
     private final PostService postService;
