@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="HttpClientEndpointsTabState">
+    <option name="requestToText" value="&lt;CachedHttpClientTabRequests&gt;&#10;  &lt;entry key=&quot;677049abe5f1b6ca77695c9e041e55c9fc279c85&quot; value=&quot;###&amp;#10;POST http://localhost:8080/{{$placeholder}}/posts/{{id}}/like&quot; /&gt;&#10;&lt;/CachedHttpClientTabRequests&gt;" />
+  </component>
+</project>
