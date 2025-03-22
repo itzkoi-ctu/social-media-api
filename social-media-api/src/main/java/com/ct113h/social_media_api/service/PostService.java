@@ -13,6 +13,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,12 +34,9 @@ public class PostService   {
     private final S3Client s3Client;
     private final S3PresignedUrlService s3PresignedUrlService;
 
-    public Post createPost(String title, String text, List<String> tags, MultipartFile mediaFile) throws IOException {
+    public  Post createPost(String title, String text, List<String> tags, MultipartFile mediaFile) throws IOException {
         String fileName = storeFileInS3(mediaFile);
-        PostCreator creator = PostCreator.builder()
-                .id("1")
-                .name("John Doe")
-                .build();
+        PostCreator creator = getPostCreator();
         Post post = new Post();
         post.setTitle(title);
         post.setText(text);
@@ -49,6 +48,18 @@ public class PostService   {
         MediaType mediaType = getMediaType(mediaFile);
         post.setMediaType(mediaType);
         return postRepository.save(post);
+    }
+
+    private static PostCreator getPostCreator() {
+        var auth = (JwtAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
+        var claims = auth.getToken().getClaims();
+        var userId = (String) claims.get("id");
+        var userName = (String) claims.get("name");
+        PostCreator creator = PostCreator.builder()
+                .id(userId)
+                .name(userName)
+                .build();
+        return creator;
     }
 
     private static MediaType getMediaType(MultipartFile mediaFile) {
@@ -77,6 +88,7 @@ public class PostService   {
             if(post.getMediaUrl()!=null) {
                 post.setPresignedUrl(s3PresignedUrlService.generatePresignedUrl(post.getMediaUrl()));
             }
+            post.getCreator().setProfilePhoto(s3PresignedUrlService.generatePresignedUrl(post.getCreator().getId()+"-profile"));
         });
         return postList;
     }
